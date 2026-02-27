@@ -7,85 +7,137 @@ import numpy as np
 import time
 from datetime import datetime
 
-st.set_page_config(page_title="QuantStock", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="QuantStock", layout="wide", initial_sidebar_state="collapsed")
 
-st.markdown("<style>html,body,[class*='css']{font-family:'Courier New',monospace;background:#080c10;color:#c8d6e5;}.main{background:#080c10;}.block-container{padding:1rem 2rem;max-width:100%;}#MainMenu,footer,header{visibility:hidden;}section[data-testid='stSidebar']{background:#0d1117 !important;border-right:1px solid #1e2d3d;}.hdr{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0 1.2rem;border-bottom:1px solid #1e2d3d;margin-bottom:1.4rem;}.appt{font-size:1.8rem;font-weight:700;color:#00d4ff;letter-spacing:3px;}.apps{font-size:0.68rem;color:#4a6a8a;letter-spacing:2px;margin-top:2px;}.lbadge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,100,0.08);border:1px solid rgba(0,212,100,0.3);color:#00d464;font-size:0.72rem;padding:4px 12px;border-radius:3px;letter-spacing:2px;font-weight:600;}.ldot{width:7px;height:7px;background:#00d464;border-radius:50%;animation:pulse 1.4s infinite;display:inline-block;}@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}.card{background:#0d1117;border:1px solid #1e2d3d;border-radius:6px;padding:1.2rem 1.4rem;margin-bottom:0.4rem;}.cbull{border-left:3px solid #00d464;}.cbear{border-left:3px solid #ff3b5c;}.cneut{border-left:3px solid #ffa500;}.tkr{font-size:1.4rem;font-weight:700;color:#e8f4fd;letter-spacing:2px;}.prc{font-size:1.5rem;font-weight:700;color:#00d4ff;}.cup{color:#00d464;font-size:0.85rem;}.cdn{color:#ff3b5c;font-size:0.85rem;}.sbadge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}.sbull{background:rgba(0,212,100,0.12);color:#00d464;border:1px solid rgba(0,212,100,0.3);}.sbear{background:rgba(255,59,92,0.12);color:#ff3b5c;border:1px solid rgba(255,59,92,0.3);}.sneut{background:rgba(255,165,0,0.12);color:#ffa500;border:1px solid rgba(255,165,0,0.3);}.rec{background:#111822;border:1px solid #1e2d3d;border-radius:4px;padding:0.5rem 0.9rem;font-size:0.82rem;margin-top:0.6rem;color:#8aadcc;}.cbw{background:#111822;border-radius:3px;height:5px;width:100%;margin-top:6px;}.cbf{height:5px;border-radius:3px;}.stg{display:inline-block;background:#111822;border:1px solid #1e2d3d;color:#6a8aaa;font-size:0.68rem;padding:2px 8px;border-radius:2px;margin:2px 2px 0 0;}.slbl{font-size:0.65rem;color:#4a6a8a;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}.sval{font-size:0.9rem;color:#c8d6e5;font-weight:600;}.div{border:none;border-top:1px solid #1e2d3d;margin:0.8rem 0;}.sec{font-size:0.75rem;letter-spacing:3px;text-transform:uppercase;color:#4a6a8a;border-bottom:1px solid #1e2d3d;padding-bottom:6px;margin-bottom:12px;margin-top:20px;}div[data-testid='metric-container']{background:#111822;border:1px solid #1e2d3d;border-radius:4px;padding:0.6rem 0.9rem;}div[data-testid='metric-container'] label{color:#4a6a8a !important;font-size:0.7rem !important;}div[data-testid='metric-container'] div[data-testid='stMetricValue']{color:#00d4ff !important;font-size:1.1rem !important;}.stButton > button{background:#111822 !important;border:1px solid #1e2d3d !important;color:#8aadcc !important;border-radius:4px !important;}</style>", unsafe_allow_html=True)
+st.markdown("""
+<style>
+html, body, [class*="css"] { font-family: 'Segoe UI', sans-serif; background: #0a0e1a; color: #e2e8f0; }
+.main { background: #0a0e1a; }
+.block-container { padding: 1.5rem 2rem; max-width: 100%; }
+#MainMenu, footer, header { visibility: hidden; }
+section[data-testid="stSidebar"] { background: #0d1117 !important; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #1e3a5f; padding-bottom: 1rem; }
+.app-logo { font-size: 1.6rem; font-weight: 800; color: #38bdf8; letter-spacing: 2px; }
+.app-time { font-size: 0.75rem; color: #4a6a8a; }
+.live-pill { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.4); color: #22c55e; font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 1px; }
+.search-wrap { background: #0d1625; border: 1px solid #1e3a5f; border-radius: 10px; padding: 1rem 1.2rem; margin-bottom: 1.5rem; }
+.search-label { font-size: 0.7rem; color: #4a6a8a; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+.watchlist-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; align-items: center; }
+.wtag { background: #0d1625; border: 1px solid #1e3a5f; border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; color: #94a3b8; display: inline-flex; align-items: center; gap: 8px; }
+.wtag-active { border-color: #38bdf8; color: #38bdf8; background: rgba(56,189,248,0.08); }
+.card { background: #0d1625; border: 1px solid #1e3a5f; border-radius: 10px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; }
+.card-bull { border-left: 3px solid #22c55e; }
+.card-bear { border-left: 3px solid #ef4444; }
+.card-neut { border-left: 3px solid #f59e0b; }
+.ticker-sym { font-size: 1.6rem; font-weight: 800; color: #f1f5f9; letter-spacing: 1px; }
+.ticker-name { font-size: 0.75rem; color: #4a6a8a; margin-top: 2px; }
+.price-big { font-size: 1.8rem; font-weight: 700; color: #38bdf8; }
+.chg-up { color: #22c55e; font-size: 0.9rem; font-weight: 600; }
+.chg-dn { color: #ef4444; font-size: 0.9rem; font-weight: 600; }
+.sig-bull { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); padding: 2px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; }
+.sig-bear { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); padding: 2px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; }
+.sig-neut { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); padding: 2px 10px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; }
+.stat-box { background: #0a0e1a; border: 1px solid #1e3a5f; border-radius: 6px; padding: 0.6rem 0.8rem; text-align: center; }
+.stat-lbl { font-size: 0.6rem; color: #4a6a8a; letter-spacing: 1px; text-transform: uppercase; }
+.stat-val { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+.rec-bar { background: #0a0e1a; border: 1px solid #1e3a5f; border-radius: 6px; padding: 0.6rem 1rem; margin-top: 0.8rem; font-size: 0.82rem; color: #94a3b8; }
+.stag { display: inline-block; background: #0a0e1a; border: 1px solid #1e3a5f; color: #64748b; font-size: 0.68rem; padding: 2px 8px; border-radius: 4px; margin: 3px 2px 0 0; }
+.conf-wrap { background: #0a0e1a; border-radius: 4px; height: 4px; width: 100%; margin-top: 6px; }
+.section-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: #4a6a8a; margin: 1.5rem 0 0.5rem 0; }
+div[data-testid="metric-container"] { background: #0d1625; border: 1px solid #1e3a5f; border-radius: 8px; padding: 0.8rem 1rem; }
+div[data-testid="metric-container"] label { color: #4a6a8a !important; font-size: 0.7rem !important; }
+div[data-testid="metric-container"] div[data-testid="stMetricValue"] { color: #38bdf8 !important; font-size: 1.2rem !important; font-weight: 700 !important; }
+.stButton > button { background: #0d1625 !important; border: 1px solid #1e3a5f !important; color: #94a3b8 !important; border-radius: 6px !important; transition: all 0.15s !important; }
+.stButton > button:hover { border-color: #38bdf8 !important; color: #38bdf8 !important; }
+div[data-testid="stTextInput"] input { background: #0a0e1a !important; border: 1px solid #1e3a5f !important; color: #e2e8f0 !important; border-radius: 6px !important; }
+div[data-testid="stTextInput"] input:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 2px rgba(56,189,248,0.15) !important; }
+</style>
+""", unsafe_allow_html=True)
 
 if "tickers" not in st.session_state:
     st.session_state.tickers = ["AAPL", "TSLA", "NVDA", "AMZN"]
+if "selected" not in st.session_state:
+    st.session_state.selected = "AAPL"
 if "last_refresh" not in st.session_state:
     st.session_state.last_refresh = time.time()
 if "refresh_count" not in st.session_state:
     st.session_state.refresh_count = 0
 
-with st.sidebar:
-    st.markdown('<div class="sec">Add Ticker</div>', unsafe_allow_html=True)
-    new_ticker = st.text_input("", placeholder="Symbol e.g. MSFT", label_visibility="collapsed", key="new_t")
-    if st.button("+ Add to Watchlist", use_container_width=True):
-        sym = new_ticker.strip().upper()
-        if sym and sym not in st.session_state.tickers:
-            with st.spinner("Verifying..."):
-                try:
-                    px = yf.Ticker(sym).fast_info.last_price
-                    if px and px > 0:
-                        st.session_state.tickers.append(sym)
-                        st.success(sym + " added")
-                        st.rerun()
-                    else:
-                        st.error("Not found: " + sym)
-                except Exception:
-                    st.error("Could not verify: " + sym)
-        elif sym in st.session_state.tickers:
-            st.warning(sym + " already in watchlist")
-    st.markdown('<div class="sec">Watchlist</div>', unsafe_allow_html=True)
-    to_remove = None
-    for _t in st.session_state.tickers:
-        _c1, _c2 = st.columns([3, 1])
-        with _c1:
-            st.markdown("<span style='color:#c8d6e5;font-size:0.85rem'>" + _t + "</span>", unsafe_allow_html=True)
-        with _c2:
-            if st.button("x", key="rm_" + _t):
-                to_remove = _t
-    if to_remove:
-        st.session_state.tickers.remove(to_remove)
+now_str = datetime.now().strftime("%a %d %b %Y  |  %H:%M:%S")
+
+st.markdown("<div class='top-bar'><div><div class='app-logo'>QUANTSTOCK</div><div class='app-time'>" + now_str + "</div></div><div class='live-pill'>● LIVE</div></div>", unsafe_allow_html=True)
+
+st.markdown("<div class='search-label'>Search &amp; Add Ticker</div>", unsafe_allow_html=True)
+col_in, col_btn, col_ref = st.columns([4, 1, 1])
+with col_in:
+    new_ticker = st.text_input("", placeholder="Enter symbol e.g. MSFT, GOOGL, BTC-USD ...", label_visibility="collapsed", key="new_t")
+with col_btn:
+    add_clicked = st.button("+ Add", use_container_width=True)
+with col_ref:
+    if st.button("⟳ Refresh", use_container_width=True):
+        st.cache_data.clear()
+        st.session_state.last_refresh = time.time()
+        st.session_state.refresh_count += 1
         st.rerun()
-    st.markdown('<div class="sec">Settings</div>', unsafe_allow_html=True)
-    tf = st.selectbox("Timeframe", ["5m", "15m", "30m", "1h", "1d"], index=3)
-    show_bb = st.toggle("Bollinger Bands", value=True)
-    show_sma50 = st.toggle("SMA 50", value=False)
-    show_vol = st.toggle("Volume Panel", value=True)
-    st.markdown('<div class="sec">Auto-Refresh</div>', unsafe_allow_html=True)
-    auto_ref = st.toggle("Enable", value=True)
-    ref_secs = st.select_slider("Interval", options=[30, 60, 120, 300, 600], value=60, format_func=lambda x: str(x) + "s" if x < 60 else str(x // 60) + "m")
-    st.markdown('<div class="div"></div>', unsafe_allow_html=True)
-    _b1, _b2 = st.columns(2)
-    with _b1:
-        if st.button("Refresh", use_container_width=True):
-            st.cache_data.clear()
-            st.session_state.last_refresh = time.time()
-            st.session_state.refresh_count += 1
+
+if add_clicked:
+    sym = new_ticker.strip().upper()
+    if sym and sym not in st.session_state.tickers:
+        with st.spinner("Verifying " + sym + "..."):
+            try:
+                px = yf.Ticker(sym).fast_info.last_price
+                if px and px > 0:
+                    st.session_state.tickers.append(sym)
+                    st.session_state.selected = sym
+                    st.success(sym + " added to watchlist")
+                    st.rerun()
+                else:
+                    st.error("Symbol not found: " + sym)
+            except Exception:
+                st.error("Could not verify: " + sym)
+    elif sym in st.session_state.tickers:
+        st.warning(sym + " is already in your watchlist")
+
+st.markdown("<div class='section-label'>Watchlist</div>", unsafe_allow_html=True)
+
+ticker_cols = st.columns(len(st.session_state.tickers) + 1)
+to_remove = None
+for i, t in enumerate(st.session_state.tickers):
+    with ticker_cols[i]:
+        is_sel = (t == st.session_state.selected)
+        label = ("▶ " if is_sel else "") + t
+        if st.button(label, key="sel_" + t, use_container_width=True):
+            st.session_state.selected = t
             st.rerun()
-    with _b2:
-        if st.button("Clear Cache", use_container_width=True):
-            st.cache_data.clear()
+with ticker_cols[len(st.session_state.tickers)]:
+    if len(st.session_state.tickers) > 1:
+        if st.button("✕ Remove " + st.session_state.selected, use_container_width=True):
+            st.session_state.tickers.remove(st.session_state.selected)
+            st.session_state.selected = st.session_state.tickers[0]
             st.rerun()
-    st.markdown('<div class="div"></div>', unsafe_allow_html=True)
-    _ldt = datetime.fromtimestamp(st.session_state.last_refresh).strftime("%H:%M:%S")
-    st.markdown("<div style='font-size:0.65rem;color:#4a6a8a;line-height:2;'>UPDATED: " + _ldt + "<br>REFRESHES: " + str(st.session_state.refresh_count) + "<br>TICKERS: " + str(len(st.session_state.tickers)) + "</div>", unsafe_allow_html=True)
+
+st.markdown("---")
+
+col_tf, col_bb, col_sma, col_vol, col_ar = st.columns([2, 1, 1, 1, 2])
+with col_tf:
+    tf = st.selectbox("Timeframe", ["5m", "15m", "30m", "1h", "1d"], index=3, label_visibility="visible")
+with col_bb:
+    show_bb = st.toggle("BB", value=True)
+with col_sma:
+    show_sma50 = st.toggle("SMA50", value=False)
+with col_vol:
+    show_vol = st.toggle("Volume", value=True)
+with col_ar:
+    auto_ref = st.toggle("Auto-refresh", value=True)
 
 if auto_ref:
     try:
         from streamlit_autorefresh import st_autorefresh
-        st_autorefresh(interval=ref_secs * 1000, limit=99999, key="ar")
+        st_autorefresh(interval=60000, limit=99999, key="ar")
     except ImportError:
         pass
 
-now_str = datetime.now().strftime("%a %d %b %Y  |  %H:%M:%S")
-st.markdown("<div class='hdr'><div><div class='appt'>QuantStock</div><div class='apps'>Real-Time Signal Dashboard  |  " + now_str + "</div></div><div class='lbadge'><span class='ldot'></span> LIVE</div></div>", unsafe_allow_html=True)
-
-if not st.session_state.tickers:
-    st.info("Watchlist is empty. Add tickers using the sidebar.")
-    st.stop()
+ticker = st.session_state.selected
 
 
 @st.cache_data(ttl=30)
@@ -116,6 +168,7 @@ def add_indicators(df):
     df["RSI"] = 100 - (100 / (1 + ag / al.replace(0, np.nan)))
     df["MACD"] = c.ewm(span=12, adjust=False).mean() - c.ewm(span=26, adjust=False).mean()
     df["MACDS"] = df["MACD"].ewm(span=9, adjust=False).mean()
+    df["MACDH"] = df["MACD"] - df["MACDS"]
     prev_c = c.shift(1)
     tr = pd.concat([(h - lo), (h - prev_c).abs(), (lo - prev_c).abs()], axis=1).max(axis=1)
     df["ATR"] = tr.ewm(span=14, adjust=False).mean()
@@ -229,110 +282,103 @@ def safe_f(val, d=0.0):
         return d
 
 
-def build_card(ticker, direction, conf, sigs, rec, price, chg, chg_pct, rsi_v, macd_v, atr_v, vol_r):
-    cc = "cbull" if direction == "BULLISH" else "cbear" if direction == "BEARISH" else "cneut"
-    sc = "sbull" if direction == "BULLISH" else "sbear" if direction == "BEARISH" else "sneut"
-    sl = "BULL" if direction == "BULLISH" else "BEAR" if direction == "BEARISH" else "NEUT"
-    fc = "#00d464" if direction == "BULLISH" else "#ff3b5c" if direction == "BEARISH" else "#ffa500"
-    dc = "cup" if chg >= 0 else "cdn"
-    ds = "+" if chg >= 0 else ""
-    rc = "#00d464" if rsi_v < 40 else "#ff3b5c" if rsi_v > 60 else "#c8d6e5"
-    mc = "#00d464" if macd_v > 0 else "#ff3b5c"
-    vc = "#ffa500" if vol_r > 1.5 else "#c8d6e5"
-    ps = "${:,.2f}".format(price)
-    cs = "{}{:.2f} ({}{:.2f}%)".format(ds, chg, ds, chg_pct)
-    ns = str(conf) + "%"
-    tags = "".join(["<span class='stg'>" + s + "</span>" for s in sigs])
-    h = "<div class='card " + cc + "'>"
-    h += "<div style='display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;'>"
-    h += "<div>"
-    h += "<div style='display:flex;align-items:center;gap:12px;margin-bottom:4px;'>"
-    h += "<span class='tkr'>" + ticker + "</span>"
-    h += "<span class='sbadge " + sc + "'>" + sl + " " + direction + "</span>"
-    h += "</div>"
-    h += "<div style='display:flex;align-items:baseline;gap:10px;'>"
-    h += "<span class='prc'>" + ps + "</span>"
-    h += "<span class='" + dc + "'>" + cs + "</span>"
-    h += "</div>"
-    h += "<div style='margin-top:8px;'>"
-    h += "<div style='font-size:0.65rem;color:#4a6a8a;margin-bottom:3px;'>CONFIDENCE " + ns + "</div>"
-    h += "<div class='cbw'><div class='cbf' style='width:" + ns + ";background:" + fc + ";'></div></div>"
+df_raw = get_data(ticker, tf)
+if df_raw is None:
+    st.error("No data available for " + ticker + " on " + tf + " timeframe. Try a different timeframe.")
+    st.stop()
+
+df = add_indicators(df_raw)
+direction, conf, sigs, rec, price, chg, chg_pct = get_signal(df)
+
+rsi_v = safe_f(df["RSI"].iloc[-1])
+macd_v = safe_f(df["MACD"].iloc[-1])
+atr_v = safe_f(df["ATR"].iloc[-1])
+vol_v = safe_f(df["Volume"].iloc[-1])
+vol_a = safe_f(df["VOLSMA"].iloc[-1], vol_v)
+vol_r = (vol_v / vol_a) if vol_a > 0 else 1.0
+
+if direction == "BULLISH":
+    sig_cls = "sig-bull"
+    card_cls = "card-bull"
+    conf_col = "#22c55e"
+elif direction == "BEARISH":
+    sig_cls = "sig-bear"
+    card_cls = "card-bear"
+    conf_col = "#ef4444"
+else:
+    sig_cls = "sig-neut"
+    card_cls = "card-neut"
+    conf_col = "#f59e0b"
+
+chg_cls = "chg-up" if chg >= 0 else "chg-dn"
+chg_sign = "+" if chg >= 0 else ""
+rsi_col = "#22c55e" if rsi_v < 40 else "#ef4444" if rsi_v > 60 else "#94a3b8"
+macd_col = "#22c55e" if macd_v > 0 else "#ef4444"
+vol_col = "#f59e0b" if vol_r > 1.5 else "#94a3b8"
+price_s = "${:,.2f}".format(price)
+chg_s = "{}{:.2f} ({}{:.2f}%)".format(chg_sign, chg, chg_sign, chg_pct)
+conf_s = str(conf) + "%"
+tags = "".join(["<span class='stag'>" + s + "</span>" for s in sigs])
+
+info_col, chart_col = st.columns([1, 3])
+
+with info_col:
+    h = "<div class='card " + card_cls + "'>"
+    h += "<div style='margin-bottom:0.8rem;'>"
+    h += "<div style='display:flex;align-items:center;gap:10px;'>"
+    h += "<span class='ticker-sym'>" + ticker + "</span>"
+    h += "<span class='" + sig_cls + "'>" + direction + "</span>"
     h += "</div></div>"
-    h += "<div style='display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.8rem;min-width:280px;'>"
-    h += "<div><div class='slbl'>RSI</div><div class='sval' style='color:" + rc + "'>" + "{:.1f}".format(rsi_v) + "</div></div>"
-    h += "<div><div class='slbl'>MACD</div><div class='sval' style='color:" + mc + "'>" + "{:+.3f}".format(macd_v) + "</div></div>"
-    h += "<div><div class='slbl'>ATR</div><div class='sval'>" + "{:.2f}".format(atr_v) + "</div></div>"
-    h += "<div><div class='slbl'>VOL</div><div class='sval' style='color:" + vc + "'>" + "{:.1f}x".format(vol_r) + "</div></div>"
-    h += "</div></div>"
-    h += "<div class='rec'>" + rec + "</div>"
-    h += "<div style='margin-top:8px;'>" + tags + "</div>"
+    h += "<div class='price-big'>" + price_s + "</div>"
+    h += "<div class='" + chg_cls + "' style='margin-top:4px;'>" + chg_s + "</div>"
+    h += "<div style='margin-top:1rem;font-size:0.65rem;color:#4a6a8a;margin-bottom:4px;'>CONFIDENCE</div>"
+    h += "<div class='conf-wrap'>"
+    h += "<div style='height:4px;border-radius:4px;background:" + conf_col + ";width:" + conf_s + ";'></div>"
     h += "</div>"
-    return h
+    h += "<div style='font-size:0.75rem;color:" + conf_col + ";margin-top:4px;font-weight:600;'>" + conf_s + "</div>"
+    h += "<div class='rec-bar'>" + rec + "</div>"
+    h += "<div style='margin-top:0.8rem;'>" + tags + "</div>"
+    h += "</div>"
+    h += "<div style='display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;'>"
+    h += "<div class='stat-box'><div class='stat-lbl'>RSI</div><div class='stat-val' style='color:" + rsi_col + "'>" + "{:.1f}".format(rsi_v) + "</div></div>"
+    h += "<div class='stat-box'><div class='stat-lbl'>MACD</div><div class='stat-val' style='color:" + macd_col + "'>" + "{:+.3f}".format(macd_v) + "</div></div>"
+    h += "<div class='stat-box'><div class='stat-lbl'>ATR</div><div class='stat-val'>" + "{:.2f}".format(atr_v) + "</div></div>"
+    h += "<div class='stat-box'><div class='stat-lbl'>VOL RATIO</div><div class='stat-val' style='color:" + vol_col + "'>" + "{:.1f}x".format(vol_r) + "</div></div>"
+    h += "</div>"
+    st.markdown(h, unsafe_allow_html=True)
 
-
-summary = {}
-mcols = st.columns(len(st.session_state.tickers))
-for idx, ticker in enumerate(st.session_state.tickers):
-    df_raw = get_data(ticker, tf)
-    if df_raw is None:
-        with mcols[idx]:
-            st.metric(ticker, "N/A")
-        continue
-    df_ind = add_indicators(df_raw)
-    result = get_signal(df_ind)
-    summary[ticker] = (df_ind,) + result
-    direction, conf, sigs, rec, price, chg, chg_pct = result
-    sgn = "+" if chg >= 0 else ""
-    with mcols[idx]:
-        st.metric(ticker, "${:,.2f}".format(price), "{}{:.2f}%".format(sgn, chg_pct))
-
-st.markdown("<div class='div'></div>", unsafe_allow_html=True)
-
-for ticker in st.session_state.tickers:
-    if ticker not in summary:
-        st.warning(ticker + ": no data available for this timeframe")
-        continue
-    df, direction, conf, sigs, rec, price, chg, chg_pct = summary[ticker]
-    rsi_v = safe_f(df["RSI"].iloc[-1])
-    macd_v = safe_f(df["MACD"].iloc[-1])
-    atr_v = safe_f(df["ATR"].iloc[-1])
-    vol_v = safe_f(df["Volume"].iloc[-1])
-    vol_a = safe_f(df["VOLSMA"].iloc[-1], vol_v)
-    vol_r = (vol_v / vol_a) if vol_a > 0 else 1.0
-    st.markdown(build_card(ticker, direction, conf, sigs, rec, price, chg, chg_pct, rsi_v, macd_v, atr_v, vol_r), unsafe_allow_html=True)
+with chart_col:
     rows = 3 if show_vol else 2
-    heights = [0.55, 0.22, 0.23] if show_vol else [0.65, 0.35]
-    fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, row_heights=heights, vertical_spacing=0.02)
-    fig.add_trace(go.Candlestick(x=df.index, open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"], name="Price", increasing_line_color="#00d464", decreasing_line_color="#ff3b5c"), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df["SMA20"], name="SMA20", line=dict(color="#ff9800", width=1.5, dash="dot")), row=1, col=1)
+    heights = [0.58, 0.20, 0.22] if show_vol else [0.72, 0.28]
+    row_titles = ["Price", "Volume", "RSI"] if show_vol else ["Price", "RSI"]
+    fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, row_heights=heights, vertical_spacing=0.03, row_titles=row_titles)
+    fig.add_trace(go.Candlestick(x=df.index, open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"], name="Price", increasing_line_color="#22c55e", decreasing_line_color="#ef4444"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df["SMA20"], name="SMA20", line=dict(color="#f59e0b", width=1.5, dash="dot")), row=1, col=1)
     if show_sma50:
-        fig.add_trace(go.Scatter(x=df.index, y=df["SMA50"], name="SMA50", line=dict(color="#ab47bc", width=1.5, dash="dot")), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df.index, y=df["SMA50"], name="SMA50", line=dict(color="#a78bfa", width=1.5, dash="dot")), row=1, col=1)
     if show_bb:
-        fig.add_trace(go.Scatter(x=df.index, y=df["BBU"], name="BB Upper", line=dict(color="rgba(100,180,255,0.4)", width=1), showlegend=False), row=1, col=1)
-        fig.add_trace(go.Scatter(x=df.index, y=df["BBL"], name="BB Lower", fill="tonexty", fillcolor="rgba(100,180,255,0.05)", line=dict(color="rgba(100,180,255,0.4)", width=1), showlegend=False), row=1, col=1)
-    stc = "#00d464" if df["STDIR"].iloc[-1] == 1 else "#ff3b5c"
+        fig.add_trace(go.Scatter(x=df.index, y=df["BBU"], name="BB Upper", line=dict(color="rgba(56,189,248,0.5)", width=1), showlegend=False), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df.index, y=df["BBL"], name="BB Lower", fill="tonexty", fillcolor="rgba(56,189,248,0.04)", line=dict(color="rgba(56,189,248,0.5)", width=1), showlegend=False), row=1, col=1)
+    stc = "#22c55e" if df["STDIR"].iloc[-1] == 1 else "#ef4444"
     fig.add_trace(go.Scatter(x=df.index, y=df["STLINE"], name="SuperTrend", line=dict(color=stc, width=2)), row=1, col=1)
     rsi_row = 2
     if show_vol:
         cl = df["Close"].squeeze().tolist()
         op = df["Open"].squeeze().tolist()
-        vc = ["rgba(0,212,100,0.33)" if cl[i] >= op[i] else "rgba(255,59,92,0.33)" for i in range(len(cl))]
+        vc = ["rgba(34,197,94,0.4)" if cl[i] >= op[i] else "rgba(239,68,68,0.4)" for i in range(len(cl))]
         fig.add_trace(go.Bar(x=df.index, y=df["Volume"], name="Volume", marker_color=vc, showlegend=False), row=2, col=1)
-        fig.add_trace(go.Scatter(x=df.index, y=df["VOLSMA"], name="Vol SMA", line=dict(color="#ff9800", width=1), showlegend=False), row=2, col=1)
+        fig.add_trace(go.Scatter(x=df.index, y=df["VOLSMA"], name="Vol MA", line=dict(color="#f59e0b", width=1.2), showlegend=False), row=2, col=1)
         rsi_row = 3
-    fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], name="RSI", line=dict(color="#7c4dff", width=1.5), fill="tozeroy", fillcolor="rgba(124,77,255,0.06)"), row=rsi_row, col=1)
-    fig.add_hline(y=70, row=rsi_row, col=1, line=dict(color="#ff3b5c", dash="dot", width=1))
-    fig.add_hline(y=30, row=rsi_row, col=1, line=dict(color="#00d464", dash="dot", width=1))
-    fig.add_hrect(y0=30, y1=70, row=rsi_row, col=1, fillcolor="rgba(255,255,255,0.015)", line_width=0)
-    fig.update_layout(height=680, template="plotly_dark", paper_bgcolor="#0d1117", plot_bgcolor="#080c10", font=dict(family="Courier New, monospace", size=11, color="#6a8aaa"), legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="right", x=1, bgcolor="rgba(0,0,0,0)", font=dict(size=10)), margin=dict(l=10, r=10, t=10, b=10), xaxis_rangeslider_visible=False)
-    fig.update_xaxes(showgrid=True, gridcolor="#1e2d3d", showline=True, linecolor="#1e2d3d", tickfont=dict(size=10))
-    fig.update_yaxes(showgrid=True, gridcolor="#1e2d3d", showline=True, linecolor="#1e2d3d", tickfont=dict(size=10))
-    fig.update_yaxes(title_text="Price", row=1, col=1, title_font=dict(size=10))
-    if show_vol:
-        fig.update_yaxes(title_text="Vol", row=2, col=1, title_font=dict(size=10))
-    fig.update_yaxes(title_text="RSI", row=rsi_row, col=1, title_font=dict(size=10), range=[0, 100])
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-    st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+    fig.add_trace(go.Scatter(x=df.index, y=df["RSI"], name="RSI", line=dict(color="#818cf8", width=1.8)), row=rsi_row, col=1)
+    fig.add_hline(y=70, row=rsi_row, col=1, line=dict(color="#ef4444", dash="dash", width=1))
+    fig.add_hline(y=30, row=rsi_row, col=1, line=dict(color="#22c55e", dash="dash", width=1))
+    fig.add_hline(y=50, row=rsi_row, col=1, line=dict(color="#334155", dash="dot", width=1))
+    fig.add_hrect(y0=30, y1=70, row=rsi_row, col=1, fillcolor="rgba(129,140,248,0.03)", line_width=0)
+    fig.update_layout(height=700, template="plotly_dark", paper_bgcolor="#0d1625", plot_bgcolor="#0a0e1a", font=dict(family="Segoe UI, sans-serif", size=11, color="#64748b"), legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, bgcolor="rgba(0,0,0,0)", font=dict(size=11, color="#94a3b8")), margin=dict(l=0, r=20, t=30, b=0), xaxis_rangeslider_visible=False, hovermode="x unified")
+    fig.update_xaxes(showgrid=True, gridcolor="#1e3a5f", gridwidth=1, showline=False, zeroline=False, tickfont=dict(size=10, color="#4a6a8a"))
+    fig.update_yaxes(showgrid=True, gridcolor="#1e3a5f", gridwidth=1, showline=False, zeroline=False, tickfont=dict(size=10, color="#4a6a8a"), tickprefix="$", row=1, col=1)
+    fig.update_yaxes(showgrid=True, gridcolor="#1e3a5f", gridwidth=1, showline=False, zeroline=False, tickfont=dict(size=10, color="#4a6a8a"), row=2, col=1)
+    fig.update_yaxes(showgrid=True, gridcolor="#1e3a5f", gridwidth=1, showline=False, zeroline=False, tickfont=dict(size=10, color="#4a6a8a"), range=[0, 100], row=rsi_row, col=1)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": True, "modeBarButtonsToRemove": ["autoScale2d", "lasso2d", "select2d"], "displaylogo": False})
 
-st.markdown("<div style='text-align:center;padding:2rem 0 1rem;font-size:0.65rem;color:#2e4a6a;letter-spacing:1.5px;text-transform:uppercase;'>QuantStock  |  Educational Use Only  |  Not Financial Advice<br>Data via Yahoo Finance  |  " + now_str + "</div>", unsafe_allow_html=True)
-    
+st.markdown("<div style='text-align:center;padding:1.5rem 0 0.5rem;font-size:0.65rem;color:#1e3a5f;letter-spacing:1px;'>QUANTSTOCK  |  FOR EDUCATIONAL USE ONLY  |  NOT FINANCIAL ADVICE  |  DATA VIA Y
