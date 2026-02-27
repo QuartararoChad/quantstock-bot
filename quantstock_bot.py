@@ -284,7 +284,7 @@ if not st.session_state.tickers:
 #  DATA + INDICATORS
 # ─────────────────────────────────────────────
 @st.cache_data(ttl=30)
-def get_data(ticker: str, interval: str):
+def get_data(ticker: str, interval: str):  # returns DataFrame or None
     period = "60d" if interval == "1d" else "10d"
     try:
         df = yf.download(ticker, period=period, interval=interval,
@@ -462,4 +462,4 @@ for ticker in st.session_state.tickers:
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;min-width:300px;">
-                <div><div class="stat-label">RSI</div><div class="stat-value" style="color:{rsi_color}">{rsi_val:
+                <div><div class="stat-label">RSI</div><div class="stat-value" style=
