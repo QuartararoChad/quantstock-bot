@@ -6,7 +6,6 @@ from plotly.subplots import make_subplots
 import numpy as np
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
-import pandas_ta as ta
 
 st.set_page_config(page_title="QuantStock Bot v2.0", layout="wide", page_icon="🚀")
 st.title("🚀 QuantStock Bot v2.0")
@@ -193,3 +192,4 @@ for idx, ticker in enumerate(tickers):
 
 
 st.success("✅ QuantStock Bot v2.0 LIVE – 12 advanced quant indicators running with maximum confluence")
+
