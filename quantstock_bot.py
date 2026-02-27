@@ -303,7 +303,7 @@ for ticker in st.session_state.tickers:
     rows = 3 if show_vol else 2
     heights = [0.55, 0.22, 0.23] if show_vol else [0.65, 0.35]
     fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, row_heights=heights, vertical_spacing=0.02)
-    fig.add_trace(go.Candlestick(x=df.index, open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"], name="Price", increasing=dict(line=dict(color="#00d464", width=1), fillcolor="#00d46422"), decreasing=dict(line=dict(color="#ff3b5c", width=1), fillcolor="#ff3b5c22")), row=1, col=1)
+    fig.add_trace(go.Candlestick(x=df.index, open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"], name="Price", increasing_line_color="#00d464", decreasing_line_color="#ff3b5c"), row=1, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df["SMA20"], name="SMA20", line=dict(color="#ff9800", width=1.5, dash="dot")), row=1, col=1)
     if show_sma50:
         fig.add_trace(go.Scatter(x=df.index, y=df["SMA50"], name="SMA50", line=dict(color="#ab47bc", width=1.5, dash="dot")), row=1, col=1)
@@ -335,4 +335,3 @@ for ticker in st.session_state.tickers:
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
 st.markdown("<div style='text-align:center;padding:2rem 0 1rem;font-size:0.65rem;color:#2e4a6a;letter-spacing:1.5px;text-transform:uppercase;'>QuantStock  |  Educational Use Only  |  Not Financial Advice<br>Data via Yahoo Finance  |  " + now_str + "</div>", unsafe_allow_html=True)
-    
