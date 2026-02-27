@@ -316,7 +316,7 @@ for ticker in st.session_state.tickers:
     if show_vol:
         cl = df["Close"].squeeze().tolist()
         op = df["Open"].squeeze().tolist()
-        vc = ["#00d46455" if cl[i] >= op[i] else "#ff3b5c55" for i in range(len(cl))]
+        vc = ["rgba(0,212,100,0.33)" if cl[i] >= op[i] else "rgba(255,59,92,0.33)" for i in range(len(cl))]
         fig.add_trace(go.Bar(x=df.index, y=df["Volume"], name="Volume", marker_color=vc, showlegend=False), row=2, col=1)
         fig.add_trace(go.Scatter(x=df.index, y=df["VOLSMA"], name="Vol SMA", line=dict(color="#ff9800", width=1), showlegend=False), row=2, col=1)
         rsi_row = 3
@@ -335,3 +335,4 @@ for ticker in st.session_state.tickers:
     st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
 
 st.markdown("<div style='text-align:center;padding:2rem 0 1rem;font-size:0.65rem;color:#2e4a6a;letter-spacing:1.5px;text-transform:uppercase;'>QuantStock  |  Educational Use Only  |  Not Financial Advice<br>Data via Yahoo Finance  |  " + now_str + "</div>", unsafe_allow_html=True)
+    
