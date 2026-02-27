@@ -444,22 +444,23 @@ for ticker in st.session_state.tickers:
     macd_color= "#00d464" if macd_val>0 else "#ff3b5c"
     vol_color = "#ffa500" if vol_ratio>1.5 else "#c8d6e5"
 
-    st.markdown(f"""
-    <div class="ticker-card {card_cls}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
-            <div>
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-                    <span class="ticker-name">{ticker}</span>
-                    <span class="signal-badge {sig_cls}">{sig_icon} {direction}</span>
-                </div>
-                <div style="display:flex;align-items:baseline;gap:10px;">
-                    <span class="ticker-price">${price:,.2f}</span>
-                    <span class="{chg_cls}">{chg_sign}{chg:.2f} ({chg_sign}{chg_pct:.2f}%)</span>
-                </div>
-                <div style="margin-top:8px;">
-                    <div style="font-size:0.65rem;color:#4a6a8a;margin-bottom:3px;">CONFIDENCE {conf}%</div>
-                    <div class="conf-wrap"><div class="conf-fill" style="width:{conf}%;background:{conf_color};"></div></div>
-                </div>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;min-width:300px;">
-                <div><div class="stat-label">RSI</div><div class="stat-value" style=
+    price_str  = "${:,.2f}".format(price)
+    chg_str    = "{}{:.2f} ({}{:.2f}%)".format(chg_sign, chg, chg_sign, chg_pct)
+    conf_str   = "{}%".format(conf)
+    card_html  = (
+        '<div class="ticker-card ' + card_cls + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">' +
+        '<div>' +
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">' +
+        '<span class="ticker-name">' + ticker + '</span>' +
+        '<span class="signal-badge ' + sig_cls + '">' + sig_icon + ' ' + direction + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:baseline;gap:10px;">' +
+        '<span class="ticker-price">' + price_str + '</span>' +
+        '<span class="' + chg_cls + '">' + chg_str + '</span>' +
+        '</div>' +
+        '<div style="margin-top:8px;">' +
+        '<div style="font-size:0.65rem;color:#4a6a8a;margin-bottom:3px;">CONFIDENCE ' + conf_str + '</div>' +
+        '<div class="conf-wrap"><div class="conf-fill" style="width:' + conf_str + ';background:' + conf_color + ';"></div></div>' +
+        '</div></div>' +
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);
